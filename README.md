@@ -68,10 +68,21 @@ layerPackages = [
 ### 使用步骤
 
 1. 在 IntelliJ IDEA 中打开数据库视图
+
+   ![image-20250719222209460](C:\Users\Devil\AppData\Roaming\Typora\typora-user-images\image-20250719222209460.png)
+
 2. 选择要生成代码的表（支持多选）
+
 3. 右键点击选中的表
-4. 选择 "Scripted Extensions" → "Generate POJOs.groovy"
-5. 选择项目中的 `src/main/java` 目录作为基础目录
+
+   <img src="C:\Users\Devil\AppData\Roaming\Typora\typora-user-images\image-20250719222243865.png" alt="image-20250719222243865" style="zoom:67%;" />
+
+4. 选择 "Scripted Extensions" → "Generate POJOs.groovy"（演示带有中文插件）
+
+   <img src="C:\Users\Devil\AppData\Roaming\Typora\typora-user-images\image-20250719222432333.png" alt="image-20250719222432333" style="zoom: 67%;" />
+
+5. 选择项目中的 `src/main/java`/com/example/demo 目录作为基础目录
+
 6. 脚本会自动生成完整的代码结构
 
 ## 代码示例
