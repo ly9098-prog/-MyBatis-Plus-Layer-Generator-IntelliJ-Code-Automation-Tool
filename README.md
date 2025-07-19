@@ -1,8 +1,5 @@
 # MyBatis-Plus 代码生成器 (IntelliJ IDEA Plugin)
 
-[https://img.shields.io/badge/Java-17%252B-blue](https://img.shields.io/badge/Java-17%2B-blue)
-https://img.shields.io/badge/MyBatis--Plus-3.5.1-brightgreen
-[https://img.shields.io/badge/IntelliJ%2520IDEA-Plugin-yellow](https://img.shields.io/badge/IntelliJ%20IDEA-Plugin-yellow)
 
 ## 概述
 
