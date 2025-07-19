@@ -44,10 +44,12 @@ def generate(table) {
     // 生成各层级文件
     generateDomain(className, fields, table)
     generateMapper(className)
+    generateMapperXml(className)
     generateService(className)
     generateServiceImpl(className)
     generateController(className)
 }
+
 
 def generateDomain(className, fields, table) {
     def domainDir = new File("$baseDir/${layerPackages.domain}")
@@ -66,7 +68,9 @@ def generateDomain(className, fields, table) {
                 "lombok.AllArgsConstructor",
                 "lombok.NoArgsConstructor",
                 "com.baomidou.mybatisplus.annotation.*",
-                "java.io.Serializable"
+                "java.io.Serializable",
+                "io.swagger.annotations.ApiModel",
+                "io.swagger.annotations.ApiModelProperty"
         ] as Set
 
         // 修复时间类型导入
@@ -79,6 +83,14 @@ def generateDomain(className, fields, table) {
         imports.each { pkg -> out.println "import $pkg;" }
         out.println ""
 
+        // 获取表注释（如果为空则使用空字符串）
+        def tableComment = getTableComment(table)
+        // 转义双引号
+        tableComment = tableComment.replace("\"", "\\\"")
+
+        // 始终添加 @ApiModel 注解
+        out.println "@ApiModel(value = \"${tableComment}\")"
+
         out.println "@Data"
         out.println "@NoArgsConstructor"
         out.println "@AllArgsConstructor"
@@ -88,6 +100,14 @@ def generateDomain(className, fields, table) {
 
         // 生成字段
         fields.each { field ->
+            // 获取字段注释（如果为空则使用空字符串）
+            def fieldComment = field.comment ?: ""
+            // 转义双引号
+            fieldComment = fieldComment.replace("\"", "\\\"")
+
+            // 始终添加 @ApiModelProperty 注解
+            out.println "    @ApiModelProperty(value = \"${fieldComment}\")"
+
             if (field.isPrimaryKey) {
                 out.println "    @TableId(type = IdType.AUTO)"
             } else {
@@ -120,6 +140,39 @@ def generateMapper(className) {
         out.println "@Repository"
         out.println "public interface ${className}Mapper extends BaseMapper<${className}> {"
         out.println "}"
+    }
+}
+
+def generateMapperXml(className) {
+    // 创建 resources/mapper 目录
+    def resourcesDir = new File("$baseDir/../../another/mapper")
+    resourcesDir.mkdirs()
+
+    def xmlFile = new File(resourcesDir, "${className}Mapper.xml")
+    xmlFile.withWriter("UTF-8") { writer ->
+        def out = new PrintWriter(writer)
+
+        // 构建 Mapper 接口的全限定名
+        def mapperPackage = layerPackages.mapper.replace('/', '.')
+        def fullMapperName = "${packageName}.${mapperPackage}.${className}Mapper"
+
+        out.println "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+        out.println "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">"
+        out.println "<mapper namespace=\"${fullMapperName}\">"
+        out.println ""
+        out.println "    <!-- 基础结果映射 -->"
+        out.println "    <resultMap id=\"BaseResultMap\" type=\"${packageName}.${layerPackages.domain}.${className}\">"
+        out.println "        <!-- 在这里定义字段映射关系 -->"
+        out.println "    </resultMap>"
+        out.println ""
+        out.println "    <!-- 通用查询列 -->"
+        out.println "    <sql id=\"Base_Column_List\">"
+        out.println "        <!-- 在这里定义通用查询列 -->"
+        out.println "    </sql>"
+        out.println ""
+        out.println "    <!-- 自定义 SQL 语句可以在这里添加 -->"
+        out.println "    "
+        out.println "</mapper>"
     }
 }
 
@@ -197,7 +250,52 @@ def generateController(className) {
     }
 }
 
-// 修复calcFields方法 - 确保正确识别字段类型
+def getTableComment(table) {
+    try {
+        // 1. 尝试标准getComment方法
+        def comment = table.getComment() ?: ""
+        if (!comment.empty) return comment
+
+        // 2. 尝试getRemarks方法（通过反射）
+        try {
+            def getRemarksMethod = table.getClass().getMethod("getRemarks")
+            if (getRemarksMethod) {
+                comment = getRemarksMethod.invoke(table) ?: ""
+                if (!comment.empty) return comment
+            }
+        } catch (Exception e) {
+            // 忽略反射异常
+        }
+
+        // 3. 尝试getDescription方法
+        comment = table.getDescription() ?: ""
+        if (!comment.empty) return comment
+
+        // 4. 尝试属性获取（支持多种属性名）
+        def attributes = table.getAttributes()
+        if (attributes) {
+            // 常见属性名列表
+            def possibleKeys = ["REMARKS", "COMMENT", "DESCRIPTION", "comment", "remarks"]
+            for (key in possibleKeys) {
+                def value = attributes.get(key)
+                if (value && !value.empty) return value
+            }
+        }
+
+        // 5. 尝试toString解析（最后手段）
+        def strRepr = table.toString()
+        if (strRepr.contains("remarks=")) {
+            def pattern = /remarks='(.*?)'/
+            def matcher = strRepr =~ pattern
+            if (matcher.find()) return matcher.group(1)
+        }
+
+        return "" // 所有方法都失败
+    } catch (Exception e) {
+        return "" // 异常时返回空字符串
+    }
+}
+
 def calcFields(table) {
     def primaryKey = DasUtil.getPrimaryKey(table)
     def pkColumns = []
@@ -210,18 +308,20 @@ def calcFields(table) {
 
         // 改进类型匹配逻辑
         def matchedType = typeMapping.find { pattern, type ->
-            // 使用正则表达式匹配，而不是完全匹配
             pattern.matcher(spec).find()
         }
 
-        def typeStr = matchedType ? matchedType.value : "String" // 默认使用String
-
+        def typeStr = matchedType ? matchedType.value : "String"
         def colName = col.getName()
+
+        // 获取字段注释（如果为空则使用空字符串）
+        def comment = col.getComment() ?: ""
 
         fields += [[
                            name: javaName(colName, false),
                            type: typeStr,
                            colName: colName,
+                           comment: comment,  // 添加注释字段（可能为空字符串）
                            isPrimaryKey: pkColumns.contains(colName)
                    ]]
     }
