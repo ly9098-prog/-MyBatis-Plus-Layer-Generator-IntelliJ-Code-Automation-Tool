@@ -38,6 +38,7 @@
 - **主键自动识别**：自动识别数据库主键并添加 `@TableId` 注解
 - **字段映射**：自动添加 `@TableField` 注解映射数据库字段
 - **Lombok 集成**：实体类自动添加 `@Data`、`@NoArgsConstructor`、`@AllArgsConstructor` 注解
+- **Swagger 集成**:自动添加 `@ApiModel` 和 `@ApiModelProperty` 注解,支持表/字段注释自动提取
 - **包结构配置**：可自定义各层级的包名
 - **命名规范**：自动转换数据库表名和字段名为驼峰命名法
 - **UTF-8 支持**：确保生成文件使用 UTF-8 编码
@@ -72,23 +73,6 @@ layerPackages = [
 4. 选择 "Scripted Extensions" → "Generate POJOs.groovy"
 5. 选择项目中的 `src/main/java` 目录作为基础目录
 6. 脚本会自动生成完整的代码结构
-
-#### 生成的文件结构
-
-```tex
-src/main/java/
-├── com/yourcompany/yourproject/
-│   ├── controller/
-│   │   └── YourEntityController.java
-│   ├── domain/
-│   │   └── YourEntity.java
-│   ├── mapper/
-│   │   └── YourEntityMapper.java
-│   ├── service/
-│   │   └── IYourEntityService.java
-│   └── service/impl/
-│       └── YourEntityServiceImpl.java
-```
 
 ## 代码示例
 
@@ -169,6 +153,65 @@ public class EmployeesController {
     private IEmployeesService employeesService;
 
     // 在这里添加控制器方法
+}
+```
+
+#### 生成的xml
+
+```java
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.EmployeesMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.demo.domain.Employees">
+        <!-- 在这里定义字段映射关系 -->
+    </resultMap>
+
+    <!-- 通用查询列 -->
+    <sql id="Base_Column_List">
+        <!-- 在这里定义通用查询列 -->
+    </sql>
+
+    <!-- 自定义 SQL 语句可以在这里添加 -->
+    
+</mapper>
+```
+
+#### **Swagger2集成**(Knife4j)
+
+```java
+@ApiModel(value = "用户表")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@TableName(value = "user")
+public class User implements Serializable {
+
+    @ApiModelProperty(value = "")
+    @TableField(value = "id")
+    private Integer id;
+
+    @ApiModelProperty(value = "")
+    @TableField(value = "name")
+    private String name;
+
+    @ApiModelProperty(value = "")
+    @TableField(value = "username")
+    private String username;
+
+    @ApiModelProperty(value = "")
+    @TableField(value = "password")
+    private String password;
+
+    @ApiModelProperty(value = "")
+    @TableField(value = "created_at")
+    private Date createdAt;
+
+    @ApiModelProperty(value = "")
+    @TableField(value = "updated_at")
+    private Date updatedAt;
+
 }
 ```
 
