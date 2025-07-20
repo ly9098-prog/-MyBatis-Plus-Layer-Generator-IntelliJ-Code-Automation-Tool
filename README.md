@@ -79,7 +79,7 @@ layerPackages = [
 
 4. 选择 "Scripted Extensions" → "Generate POJOs.groovy"（演示带有中文插件）
 
-   ![步骤三](https://github.com/ly9098-prog/MyBatis-Plus-Generator-Code/blob/3a4fd75b4affbebbeb70816f341e11efd4a55b88/2.png)
+   ![步骤三](https://github.com/ly9098-prog/MyBatis-Plus-Generator-Code/blob/082f53e7adb89ddcfd5dee708c12da72094595a2/3.png)
 
 5. 选择项目中的 `src/main/java`/com/example/demo 目录作为基础目录
 
