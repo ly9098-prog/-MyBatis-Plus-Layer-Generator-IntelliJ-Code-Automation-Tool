@@ -69,17 +69,17 @@ layerPackages = [
 
 1. 在 IntelliJ IDEA 中打开数据库视图
 
-   <img src="D:\USERS\Devil\Desktop\1.png" />
+   ![步骤一](D:\USERS\Devil\Desktop\1.png)
 
 2. 选择要生成代码的表（支持多选）
 
 3. 右键点击选中的表
 
-   <img src="D:\USERS\Devil\Desktop\2.png" style="zoom:67%;" />
+   <img src="D:\USERS\Devil\Desktop\2.png" alt="步骤二" style="zoom:67%;" />
 
 4. 选择 "Scripted Extensions" → "Generate POJOs.groovy"（演示带有中文插件）
 
-   <img src="D:\USERS\Devil\Desktop\3.png" style="zoom:67%;" />
+   <img src="D:\USERS\Devil\Desktop\3.png" alt="步骤三" style="zoom:67%;" />
 
 5. 选择项目中的 `src/main/java`/com/example/demo 目录作为基础目录
 
