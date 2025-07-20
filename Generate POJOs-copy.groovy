@@ -52,17 +52,38 @@ def generate(table) {
 
 
 def generateDomain(className, fields, table) {
+    // 原始domain目录
     def domainDir = new File("$baseDir/${layerPackages.domain}")
     domainDir.mkdirs()
 
-    def file = new File(domainDir, "${className}.java")
-    file.withWriter("UTF-8"){ writer ->
+    // 创建create子目录
+    def createDir = new File(domainDir, "create")
+    createDir.mkdirs()
+
+    // 创建update子目录
+    def updateDir = new File(domainDir, "update")
+    updateDir.mkdirs()
+
+    // 生成原始domain类（保持不变）
+    generateClassFile(domainDir, "${packageName}.${layerPackages.domain}", className, fields, table)
+
+    // 生成Create后缀类（在create目录）
+    generateClassFile(createDir, "${packageName}.${layerPackages.domain}.create", "${className}Create", fields, table)
+
+    // 生成Update后缀类（在update目录）
+    generateClassFile(updateDir, "${packageName}.${layerPackages.domain}.update", "${className}Update", fields, table)
+}
+
+def generateClassFile(outputDir, packageNameStr, classNameParam, fields, table) {
+    def file = new File(outputDir, "${classNameParam}.java")
+    file.withWriter("UTF-8") { writer ->
         def out = new PrintWriter(writer)
-        // 修复包名：使用完整包路径
-        out.println "package ${packageName}.${layerPackages.domain};"
+
+        // 包声明
+        out.println "package $packageNameStr;"
         out.println ""
 
-        // 动态导入需要的包
+        // 动态导入
         def imports = [
                 "lombok.Data",
                 "lombok.AllArgsConstructor",
@@ -73,7 +94,7 @@ def generateDomain(className, fields, table) {
                 "io.swagger.annotations.ApiModelProperty"
         ] as Set
 
-        // 修复时间类型导入
+        // 特殊类型导入
         fields.each { field ->
             if (field.type == "LocalDateTime") imports.add("java.time.LocalDateTime")
             if (field.type == "Date") imports.add("java.util.Date")
@@ -83,29 +104,22 @@ def generateDomain(className, fields, table) {
         imports.each { pkg -> out.println "import $pkg;" }
         out.println ""
 
-        // 获取表注释（如果为空则使用空字符串）
-        def tableComment = getTableComment(table)
-        // 转义双引号
-        tableComment = tableComment.replace("\"", "\\\"")
+        // 表注释处理
+        def tableComment = getTableComment(table).replace("\"", "\\\"")
 
-        // 始终添加 @ApiModel 注解
+        // 类注解
         out.println "@ApiModel(value = \"${tableComment}\")"
-
         out.println "@Data"
         out.println "@NoArgsConstructor"
         out.println "@AllArgsConstructor"
         out.println "@TableName(value = \"${table.getName()}\")"
-        out.println "public class $className implements Serializable {"
+        out.println "public class $classNameParam {"
         out.println ""
 
-        // 生成字段
+        // 字段生成
         fields.each { field ->
-            // 获取字段注释（如果为空则使用空字符串）
-            def fieldComment = field.comment ?: ""
-            // 转义双引号
-            fieldComment = fieldComment.replace("\"", "\\\"")
+            def fieldComment = (field.comment ?: "").replace("\"", "\\\"")
 
-            // 始终添加 @ApiModelProperty 注解
             out.println "    @ApiModelProperty(value = \"${fieldComment}\")"
 
             if (field.isPrimaryKey) {
@@ -237,7 +251,9 @@ def generateController(className) {
         out.println "import ${packageName}.${layerPackages.service}.I${className}Service;"
         out.println "import org.springframework.beans.factory.annotation.Autowired;"
         out.println "import org.springframework.web.bind.annotation.*;"
+        out.println "import io.swagger.annotations.Api;"
         out.println ""
+        out.println "@Api(\"xx模块\")"
         out.println "@RestController"
         out.println "@RequestMapping(\"/${varName}\")"
         out.println "public class ${className}Controller {"
