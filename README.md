@@ -69,17 +69,17 @@ layerPackages = [
 
 1. 在 IntelliJ IDEA 中打开数据库视图
 
-   ![步骤一]([[D:\USERS\Devil\Desktop\1.png]()](https://github.com/ly9098-prog/MyBatis-Plus-Generator-Code/blob/7ca0d028d1c1df7a684b282b103b44eef1d7912f/1.png))
+   ![步骤一](https://github.com/ly9098-prog/MyBatis-Plus-Generator-Code/blob/7ca0d028d1c1df7a684b282b103b44eef1d7912f/1.png)
 
 2. 选择要生成代码的表（支持多选）
 
 3. 右键点击选中的表
 
-  ![步骤二]([[D:\USERS\Devil\Desktop\1.png]()](https://github.com/ly9098-prog/MyBatis-Plus-Generator-Code/blob/7ca0d028d1c1df7a684b282b103b44eef1d7912f/1.png))
+  ![步骤二](https://github.com/ly9098-prog/MyBatis-Plus-Generator-Code/blob/3a4fd75b4affbebbeb70816f341e11efd4a55b88/2.png)
 
 4. 选择 "Scripted Extensions" → "Generate POJOs.groovy"（演示带有中文插件）
 
-   <img src="D:\USERS\Devil\Desktop\3.png" alt="步骤三" style="zoom:67%;" />
+   ![步骤三](https://github.com/ly9098-prog/MyBatis-Plus-Generator-Code/blob/3a4fd75b4affbebbeb70816f341e11efd4a55b88/2.png)
 
 5. 选择项目中的 `src/main/java`/com/example/demo 目录作为基础目录
 
